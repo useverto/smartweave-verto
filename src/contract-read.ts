@@ -6,6 +6,7 @@ import { InteractionTx } from './interaction-tx';
 import GQLResultInterface, { GQLEdgeInterface, GQLTransactionsResultInterface } from './interfaces/gqlResult';
 
 import SmartWeaveError, { SmartWeaveErrorType } from './errors';
+import { Interceptors } from './interceptor';
 
 /**
  * Queries all interaction transactions and replays a contract to its latest state.
@@ -60,6 +61,8 @@ export async function readContract(
 
   const validity: Record<string, boolean> = {};
 
+  let iterations = 0;
+
   for (const txInfo of txInfos) {
     const currentTx: InteractionTx = txInfo.node;
 
@@ -110,6 +113,9 @@ export async function readContract(
     validity[currentTx.id] = result.type === 'ok';
 
     state = result.state;
+
+    await Interceptors.callInterceptors(contractId, state, iterations);
+    iterations = iterations + 1;
 
     const settings = evalSettings(state);
     const evolve: string = state.evolve || settings.get('evolve');

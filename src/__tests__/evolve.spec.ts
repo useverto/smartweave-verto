@@ -7,9 +7,14 @@ import { createContract } from '../contract-create';
 import { interactWrite } from '../contract-interact';
 import { JWKInterface } from 'arweave/node/lib/wallet';
 import { readContract } from '../contract-read';
+import { Interceptors } from '../interceptor';
 
 let inst: Arweave;
 let arlocal: ArLocal;
+
+async function mintAr(addr: string, amount: number = 10000000000000) {
+  await inst.api.get(`/mint/${addr}/${amount}`);
+}
 
 describe('Testing the evolve feature', () => {
   let contractSrcFile = '';
@@ -22,17 +27,18 @@ describe('Testing the evolve feature', () => {
   let addy = '';
 
   beforeAll(async () => {
-    arlocal = new ArLocal(1985, false);
-    await arlocal.start();
+    // arlocal = new ArLocal(1985, false);
+    // await arlocal.start();
 
     inst = Arweave.init({
-      host: 'localhost',
-      port: 1985,
-      protocol: 'http',
+      host: 'www.arweave.run',
+      port: 443,
+      protocol: 'https',
     });
 
     wallet = await inst.wallets.generate();
     addy = await inst.wallets.jwkToAddress(wallet);
+    await mintAr(addy);
 
     contractSrcFile = fs.readFileSync('examples/token-pst.js', 'utf8');
     evolvedContractSrcFile = fs.readFileSync('examples/token-evolve.js', 'utf8');
@@ -56,10 +62,19 @@ describe('Testing the evolve feature', () => {
   });
 
   afterAll(async () => {
-    await arlocal.stop();
+    // await arlocal.stop();
   });
 
   test('evolve any contract', async () => {
+
+    let interceptorNumber;
+    let latestState;
+
+    Interceptors.setContractInterceptor(contract, (contractId, state, number) => {
+      interceptorNumber = number;
+      latestState = state;
+    });
+
     // Reduce balance, should be at 50
     await interactWrite(inst, wallet, contract, {
       function: 'transfer',
@@ -85,6 +100,9 @@ describe('Testing the evolve feature', () => {
 
     const stateEvolved = await readContract(inst, contract);
     expect(stateEvolved.balances[addy]).toBe(10);
+
+    expect(interceptorNumber).toBe(2);
+    expect(latestState.balances["uhE-QeYS8i4pmUtnxQyHD7dzXFNaJ9oMK-IM-QPNY6M"]).toBe(10000100);
   });
 });
 

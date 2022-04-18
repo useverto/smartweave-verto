@@ -14,6 +14,7 @@ import {
 } from './contract-interact';
 import { readContract } from './contract-read';
 import { selectWeightedPstHolder } from './weighted-pst-holder';
+import { Interceptors } from './interceptor';
 
 const smartweave = {
   simulateCreateContractFromTx,
@@ -28,6 +29,7 @@ const smartweave = {
   interactRead,
   readContract,
   selectWeightedPstHolder,
+  Interceptors
 };
 
 export {
@@ -44,4 +46,5 @@ export {
   readContract,
   selectWeightedPstHolder,
   smartweave,
+  Interceptors
 };
