@@ -114,7 +114,7 @@ export async function readContract(
 
     state = result.state;
 
-    await Interceptors.callInterceptors(contractId, state, iterations);
+    await Interceptors.callInterceptors(contractId, state, iterations, currentTx.block.height);
     iterations = iterations + 1;
 
     const settings = evalSettings(state);

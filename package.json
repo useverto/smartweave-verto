@@ -1,6 +1,6 @@
 {
   "name": "smartweave-verto",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Simple, scalable smart contracts on the Arweave protocol.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "clean": "rimraf ./lib",
     "lint": "tslint -p tsconfig.json",
     "lint:fix": "npm run lint --fix",
-    "prepublishOnly": "npm run lint",
+    "prepublishOnly": "npm run lint && npm run build",
     "preversion": "npm run lint && npm run build",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
